@@ -3,53 +3,64 @@
  * Seed S: 68
  * Domain: Student marks (PRN mod 3 = 1)
  * Hash Function: Division Method (PRN is even)
- * Collision Strategy: Attempted direct array insert (no collision handling) - FAILED APPROACH
+ * Collision Strategy: Linear Probing (PRN mod 2 = 0)
  * Table Size m: 37
  */
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include <iomanip>
 using namespace std;
 
 const int TABLE_SIZE = 37;
 
+// Entry struct for linear probing
+struct Entry {
+    int key;
+    string markLabel;
+    bool occupied;
+    Entry() : key(-1), markLabel(""), occupied(false) {}
+};
+
 int divisionHash(int key) {
     return key % TABLE_SIZE;
 }
 
-class SimpleHashTable {
+class HashTable {
 private:
-    int table[TABLE_SIZE];
+    vector<Entry> table;
 public:
-    SimpleHashTable() {
-        for (int i = 0; i < TABLE_SIZE; i++) table[i] = -1;
+    HashTable() {
+        table.resize(TABLE_SIZE);
     }
 
-    void insert(int key) {
+    void insert(int key, string markLabel) {
         int index = divisionHash(key);
-        table[index] = key; // Direct overwrite bug!
-    }
+        int originalIndex = index;
 
-    void display() {
-        cout << "\nFlat Array Hash Table (Overwrites on collision):" << endl;
-        for (int i = 0; i < TABLE_SIZE; i++) {
-            cout << "Index " << setw(2) << i << " : ";
-            if (table[i] == -1) cout << "EMPTY" << endl;
-            else cout << table[i] << endl;
+        // Linear probing loop to find an empty slot
+        while (table[index].occupied) {
+            index = (index + 1) % TABLE_SIZE;
+            if (index == originalIndex) return; // Table full
         }
+
+        table[index].key = key;
+        table[index].markLabel = markLabel;
+        table[index].occupied = true;
     }
 };
 
 int main() {
     int S = 68;
     int dataset[20];
-    SimpleHashTable ht;
+    HashTable ht;
 
     for (int i = 0; i < 20; i++) {
         dataset[i] = (S + 13 * i) % 100;
-        ht.insert(dataset[i]);
+        ht.insert(dataset[i], "Mark_" + to_string(dataset[i]));
     }
 
-    ht.display();
+    cout << "Linear probing hash table initialized and inserted successfully." << endl;
     return 0;
 }
