@@ -38,9 +38,11 @@ public:
     void insert(int key, string markLabel) {
         int index = divisionHash(key);
         int originalIndex = index;
+        int probes = 0;
 
-        // Linear probing loop to find an empty slot
+        // Linear probing loop
         while (table[index].occupied) {
+            probes++;
             index = (index + 1) % TABLE_SIZE;
             if (index == originalIndex) return; // Table full
         }
@@ -48,6 +50,23 @@ public:
         table[index].key = key;
         table[index].markLabel = markLabel;
         table[index].occupied = true;
+
+        cout << "  Inserted key=" << setw(2) << key
+             << " (" << setw(9) << markLabel << ") -> Target "
+             << setw(2) << originalIndex << " -> Placed at Index "
+             << setw(2) << index << " (Probes: " << probes << ")" << endl;
+    }
+
+    void display() {
+        cout << "\n========== HASH TABLE (Linear Probing) ==========" << endl;
+        cout << "Table size m = 37" << endl;
+        cout << "==================================================" << endl;
+        for (int i = 0; i < TABLE_SIZE; i++) {
+            cout << "Index " << setw(2) << i << " : ";
+            if (!table[i].occupied) cout << "EMPTY" << endl;
+            else cout << "[" << table[i].key << ":" << table[i].markLabel << "]" << endl;
+        }
+        cout << "==================================================" << endl;
     }
 };
 
@@ -56,11 +75,12 @@ int main() {
     int dataset[20];
     HashTable ht;
 
+    cout << "--- Insertion Trace ---" << endl;
     for (int i = 0; i < 20; i++) {
         dataset[i] = (S + 13 * i) % 100;
         ht.insert(dataset[i], "Mark_" + to_string(dataset[i]));
     }
 
-    cout << "Linear probing hash table initialized and inserted successfully." << endl;
+    ht.display();
     return 0;
 }
