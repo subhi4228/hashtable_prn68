@@ -4,7 +4,8 @@
  * Domain: Student marks (PRN mod 3 = 1)
  * Hash Function: Division Method (PRN is even)
  * Collision Strategy: Linear Probing (PRN mod 2 = 0)
- * Table Size m: 37
+ * Table Size m: 37 (Smallest prime >= (68 mod 23) + 11 = 33)
+ * Dataset: v[i] = (68 + 13*i) mod 100, i = 0..19
  */
 
 #include <iostream>
@@ -23,18 +24,22 @@ struct Entry {
     Entry() : key(-1), markLabel(""), occupied(false) {}
 };
 
+// Division Method Hash Function
 int divisionHash(int key) {
     return key % TABLE_SIZE;
 }
 
+// Hash Table class using Linear Probing
 class HashTable {
 private:
     vector<Entry> table;
+
 public:
     HashTable() {
         table.resize(TABLE_SIZE);
     }
 
+    // Insert key using Linear Probing collision resolution
     void insert(int key, string markLabel) {
         int index = divisionHash(key);
         int originalIndex = index;
@@ -44,7 +49,10 @@ public:
         while (table[index].occupied) {
             probes++;
             index = (index + 1) % TABLE_SIZE;
-            if (index == originalIndex) return; // Table full
+            if (index == originalIndex) {
+                cout << "Error: Hash Table is full!" << endl;
+                return;
+            }
         }
 
         table[index].key = key;
@@ -52,19 +60,25 @@ public:
         table[index].occupied = true;
 
         cout << "  Inserted key=" << setw(2) << key
-             << " (" << setw(9) << markLabel << ") -> Target "
-             << setw(2) << originalIndex << " -> Placed at Index "
-             << setw(2) << index << " (Probes: " << probes << ")" << endl;
+             << " (" << setw(9) << markLabel << ") -> Target Index "
+             << setw(2) << originalIndex
+             << " -> Placed at Index " << setw(2) << index
+             << " (Probes: " << probes << ")" << endl;
     }
 
+    // Print hash table contents
     void display() {
         cout << "\n========== HASH TABLE (Linear Probing) ==========" << endl;
-        cout << "Table size m = 37" << endl;
+        cout << "Table size m = " << TABLE_SIZE << endl;
+        cout << "Hash Method : Division Method (key % 37)" << endl;
         cout << "==================================================" << endl;
         for (int i = 0; i < TABLE_SIZE; i++) {
             cout << "Index " << setw(2) << i << " : ";
-            if (!table[i].occupied) cout << "EMPTY" << endl;
-            else cout << "[" << table[i].key << ":" << table[i].markLabel << "]" << endl;
+            if (!table[i].occupied) {
+                cout << "EMPTY" << endl;
+            } else {
+                cout << "[" << table[i].key << ":" << table[i].markLabel << "]" << endl;
+            }
         }
         cout << "==================================================" << endl;
     }
@@ -73,14 +87,32 @@ public:
 int main() {
     int S = 68;
     int dataset[20];
-    HashTable ht;
+    string markLabels[20];
 
-    cout << "--- Insertion Trace ---" << endl;
+    cout << "============================================" << endl;
+    cout << "  PRN       : 202501100068" << endl;
+    cout << "  Domain    : Student marks" << endl;
+    cout << "  Hash Func : Division Method (key % 37)" << endl;
+    cout << "  Collision : Linear Probing" << endl;
+    cout << "  Table Size: 37" << endl;
+    cout << "============================================\n" << endl;
+
+    // Generate dataset & labels
+    cout << "Dataset: ";
     for (int i = 0; i < 20; i++) {
         dataset[i] = (S + 13 * i) % 100;
-        ht.insert(dataset[i], "Mark_" + to_string(dataset[i]));
+        markLabels[i] = "Mark_" + to_string(dataset[i]);
+        cout << dataset[i] << " ";
+    }
+    cout << "\n\n--- Insertion Trace ---" << endl;
+
+    HashTable ht;
+
+    for (int i = 0; i < 20; i++) {
+        ht.insert(dataset[i], markLabels[i]);
     }
 
     ht.display();
+
     return 0;
 }
